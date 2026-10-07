@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nf-core/mxampseq/master/assets/schema_analysis.json",
+    "title": "nf-core/mxampseq pipeline - params.analysis_setup schema",
+    "description": "Schema for the file provided with params.analysis_setup: a list of targets and their analysis settings",
+    "type": "array",
+    "minItems": 1,
+    "items": {
+        "type": "object",
+        "properties": {
+            "target": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9-]+$",
+                "not": { "enum": ["unknown", "Unknown", "UNKNOWN"] },
+                "errorMessage": "Target name is required, may only contain letters, digits and '-', and 'unknown' is reserved for reads matching no target",
+                "meta": ["target"]
+            },
+            "forward_primer": {
+                "type": "string",
+                "pattern": "^[ACGTRYSWKMBDHVNacgtryswkmbdhvn]+$",
+                "errorMessage": "Forward primer is required and must be an IUPAC sequence without X anchors"
+            },
+            "reverse_primer": {
+                "type": "string",
+                "pattern": "^[ACGTRYSWKMBDHVNacgtryswkmbdhvn]+$",
+                "errorMessage": "Reverse primer is required and must be an IUPAC sequence without X anchors"
+            },
+            "clustering": {
+                "type": "string",
+                "enum": ["cluster_fast", "cluster_size", "cluster_smallmem", "cluster_unoise"],
+                "errorMessage": "Clustering must be one of cluster_fast, cluster_size, cluster_smallmem, cluster_unoise",
+                "meta": ["clustering"]
+            },
+            "clustering_params": {
+                "type": "string",
+                "default": "",
+                "pattern": "^[A-Za-z0-9 .=_-]*$",
+                "not": { "pattern": "(^|\\s)--(sizein|sizeout|consout|threads|centroids|clusters|msaout|uc|otutabout|cluster_[a-z]+)(\\s|=|$)" },
+                "errorMessage": "clustering_params may only contain letters, digits, spaces and . = _ - and must not set --sizein, --sizeout, --consout, --threads, output flags or a cluster_* algorithm",
+                "meta": ["clustering_params"]
+            }
+        },
+        "required": ["target", "forward_primer", "reverse_primer", "clustering"],
+        "additionalProperties": false,
+        "uniqueEntries": ["target"]
+    }
+}

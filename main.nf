@@ -30,7 +30,9 @@ include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_mxam
 workflow NFCORE_MXAMPSEQ {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    samplesheet // channel: [ meta, reads ]
+    adapters    // value channel: linked-adapter fasta
+    targets     // value channel: map target name -> clustering settings
 
     main:
 
@@ -39,6 +41,8 @@ workflow NFCORE_MXAMPSEQ {
     //
     MXAMPSEQ (
         samplesheet,
+        adapters,
+        targets,
         params.outdir,
     )
 }
@@ -61,6 +65,9 @@ workflow {
         args,
         params.outdir,
         params.input,
+        params.analysis_setup,
+        params.demux_params,
+        params.anchor_primers,
         params.help,
         params.help_full,
         params.show_hidden
@@ -70,7 +77,9 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_MXAMPSEQ (
-        PIPELINE_INITIALISATION.out.samplesheet
+        PIPELINE_INITIALISATION.out.samplesheet,
+        PIPELINE_INITIALISATION.out.adapters,
+        PIPELINE_INITIALISATION.out.targets
     )
     //
     // SUBWORKFLOW: Run completion tasks

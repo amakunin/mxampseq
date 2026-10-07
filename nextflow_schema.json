@@ -17,22 +17,46 @@
                     "format": "file-path",
                     "exists": true,
                     "schema": "assets/schema_input.json",
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/mxampseq/usage#samplesheet-input).",
+                    "mimetype": "text/tab-separated-values",
+                    "pattern": "^\\S+\\.tsv$",
+                    "description": "Path to tab-separated file linking sample IDs to read files.",
+                    "help_text": "Tab-separated file with a header row and two columns: `sample_id` and `reads` (path to a single-end `.fastq.gz`).",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "analysis_setup": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
+                    "schema": "assets/schema_analysis.json",
                     "mimetype": "application/x-yaml",
                     "pattern": "^\\S+\\.ya?ml$",
-                    "description": "Path to YAML file with demultiplexing parameters and the list of targets with their analysis parameters.",
-                    "help_text": "Contains `demux_params` (extra cutadapt arguments, e.g. `--revcomp -e 0.15 -O 10`) and a `targets` list, each with a name, primers and clustering settings. See [usage docs](https://nf-co.re/mxampseq/usage).",
+                    "description": "Path to YAML file with the list of targets, their primers and clustering settings.",
+                    "help_text": "A YAML list; each item has `target`, `forward_primer`, `reverse_primer`, `clustering` and optionally `clustering_params`.",
                     "fa_icon": "fas fa-file-code"
                 },
+                        "demultiplexing_options": {
+            "title": "Demultiplexing options",
+            "type": "object",
+            "fa_icon": "fas fa-cut",
+            "description": "Options for separating reads into targets with cutadapt.",
+            "properties": {
+                "demux_params": {
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^[A-Za-z0-9 .=_-]*$",
+                    "not": { "pattern": "(^|\\s)(-o|--output|-g|--front|-a|--adapter|-b|--anywhere|-j|--cores|--json)(\\s|=|$)" },
+                    "description": "Additional cutadapt arguments, e.g. '-e 0.15 -O 10' or '--revcomp -e 0.15 -O 10'.",
+                    "help_text": "Output, adapter, core and report options are set by the pipeline and cannot be given here. Reads are not searched on the reverse strand unless `--revcomp` is given.",
+                    "fa_icon": "fas fa-sliders-h"
+                },
+                "anchor_primers": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Anchor primers to read ends (adds cutadapt 'X' to both ends of each linked adapter).",
+                    "fa_icon": "fas fa-anchor"
+                }
+            }
+        },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
@@ -45,6 +69,29 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                }
+            }
+        },
+        "demultiplexing_options": {
+            "title": "Demultiplexing options",
+            "type": "object",
+            "fa_icon": "fas fa-cut",
+            "description": "Options for separating reads into targets with cutadapt.",
+            "properties": {
+                "demux_params": {
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^[A-Za-z0-9 .=_-]*$",
+                    "not": { "pattern": "(^|\\s)(-o|--output|-g|--front|-a|--adapter|-b|--anywhere|-j|--cores|--json)(\\s|=|$)" },
+                    "description": "Additional cutadapt arguments, e.g. '-e 0.15 -O 10' or '--revcomp -e 0.15 -O 10'.",
+                    "help_text": "Output, adapter, core and report options are set by the pipeline and cannot be given here. Reads are not searched on the reverse strand unless `--revcomp` is given.",
+                    "fa_icon": "fas fa-sliders-h"
+                },
+                "anchor_primers": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Anchor primers to read ends (adds cutadapt 'X' to both ends of each linked adapter).",
+                    "fa_icon": "fas fa-anchor"
                 }
             }
         },
@@ -176,6 +223,9 @@
     "allOf": [
         {
             "$ref": "#/$defs/input_output_options"
+        },
+        {
+            "$ref": "#/$defs/demultiplexing_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

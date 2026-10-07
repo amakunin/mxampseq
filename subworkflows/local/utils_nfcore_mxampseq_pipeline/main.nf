@@ -32,6 +32,9 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
+    analysis_setup    //  string: Path to analysis setup yaml (list of targets)
+    demux_params      //  string: Extra cutadapt arguments
+    anchor_primers    // boolean: Anchor primers to read ends
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
@@ -100,31 +103,52 @@ workflow PIPELINE_INITIALISATION {
     )
 
     //
+    // Targets from the analysis setup, validated against assets/schema_analysis.json
+    // each row is [ meta(target, clustering, clustering_params), forward_primer, reverse_primer ]
+    //
+    def target_list = samplesheetToList(analysis_setup, "${projectDir}/assets/schema_analysis.json")
+        .collect { meta, forward_primer, reverse_primer ->
+            meta + [
+                forward_primer: forward_primer.toUpperCase(),
+                reverse_primer: reverse_primer.toUpperCase(),
+                clustering_params: meta.clustering_params ?: ''
+            ]
+        }
+
+    // Targets sharing a primer pair cannot be told apart by demultiplexing (not expressible in the schema)
+    def primer_pairs = target_list.collect { t -> "${t.forward_primer}...${t.reverse_primer}" }
+    def shared_pairs = primer_pairs.findAll { pair -> primer_pairs.count(pair) > 1 }.unique()
+    if (shared_pairs) {
+        error("Analysis setup ${analysis_setup}: several targets share the primer pair ${shared_pairs.join(', ')}")
+    }
+
+    //
+    // Linked-adapter fasta shared by all samples
+    //
+    ch_adapters = channel.of(primersToAdaptersFasta(target_list, anchor_primers))
+        .collectFile(name: 'adapters.fasta', newLine: false)
+        .first()
+
+    //
+    // Per-target clustering settings, keyed by target name
+    //
+    ch_targets = channel.value(
+        target_list.collectEntries { t ->
+            [ (t.target): [ clustering: t.clustering, clustering_params: t.clustering_params ] ]
+        }
+    )
+
+    //
     // Create channel from input file provided through params.input
     //
-
     channel
         .fromList(samplesheetToList(input, "${projectDir}/assets/schema_input.json"))
-        .map {
-            meta, fastq_1, fastq_2 ->
-                if (!fastq_2) {
-                    return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
-                } else {
-                    return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
-                }
-        }
-        .groupTuple()
-        .map { samplesheet ->
-            validateInputSamplesheet(samplesheet)
-        }
-        .map {
-            meta, fastqs ->
-                return [ meta, fastqs.flatten() ]
-        }
+        .map { meta, reads -> [ meta + [ demux_params: demux_params ], reads ] }
         .set { ch_samplesheet }
-
     emit:
     samplesheet = ch_samplesheet
+    adapters    = ch_adapters
+    targets     = ch_targets
     versions    = ch_versions
 }
 
@@ -252,3 +276,22 @@ def methodsDescriptionText(mqc_methods_yaml) {
 
     return description_html.toString()
 }
+
+//
+// Reverse complement of an IUPAC nucleotide sequence
+//
+def reverseComplement(String seq) {
+    def comp = [ A:'T', C:'G', G:'C', T:'A', R:'Y', Y:'R', S:'S', W:'W', K:'M', M:'K', B:'V', D:'H', H:'D', V:'B', N:'N' ]
+    return seq.toUpperCase().toList().reverse().collect { base -> comp[base] }.join('')
+}
+
+//
+// Linked-adapter fasta for cutadapt: >target / [X]fwd...revcomp(rev)[X]
+//
+def primersToAdaptersFasta(targets, anchor) {
+    def x = anchor ? 'X' : ''
+    return targets.collect { t ->
+        ">${t.target}\n${x}${t.forward_primer}...${reverseComplement(t.reverse_primer)}${x}\n"
+    }.join('')
+}
+
