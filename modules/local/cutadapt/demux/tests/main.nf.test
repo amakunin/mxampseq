@@ -1,0 +1,66 @@
+nextflow_process {
+
+    name "Test Process CUTADAPT_DEMUX"
+    script "../main.nf"
+    process "CUTADAPT_DEMUX"
+    config "./nextflow.config"
+
+    tag "modules"
+    tag "modules_local"
+    tag "cutadapt"
+    tag "cutadapt/demux"
+
+    test("stub") {
+
+        options "-stub"
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'test' ], file("\$projectDir/tests/data/demux/stub.fastq.gz", checkIfExists: true) ]
+                input[1] = file("\$projectDir/tests/data/demux/adapters.fasta", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert process.success },
+                { assert snapshot(process.out).match() }
+            )
+        }
+    }
+
+    // The test reads contain COI and ITS2 amplicons plus reads matching no target.
+    // P3 and cytB have no reads, so no output files are expected for them.
+    test("four amplicons") {
+
+        when {
+            process {
+                """
+                input[0] = [ [ id:'test', demux_params:'-e 0.15 -O 10' ], file("\$projectDir/tests/data/demux/four_amplicons.fastq.gz", checkIfExists: true) ]
+                input[1] = file("\$projectDir/tests/data/demux/four_amplicons_adapters.fasta", checkIfExists: true)
+                """
+            }
+        }
+
+        then {
+            def files  = process.out.reads.collect { meta, fqs -> [ fqs ].flatten() }.flatten()
+            def counts = files.collectEntries { fq -> [ (new File(fq.toString()).name): path(fq.toString()).linesGzip.size().intdiv(4) ] }.sort()
+            def report = path(process.out.json[0][1]).json
+            def matches = report.adapters_read1.collectEntries { a -> [ (a.name): a.total_matches ] }
+            assertAll(
+                { assert process.success },
+                // present: targets with reads and the unassigned reads
+                { assert counts.keySet().containsAll(['test.COI.fastq.gz', 'test.ITS2.fastq.gz', 'test.unknown.fastq.gz']) },
+                // absent: targets without reads are not emitted
+                { assert !counts.keySet().any { it.contains('.P3.') || it.contains('.cytB.') } },
+                // the cutadapt report confirms they really had no matches
+                { assert matches['P3'] == 0 && matches['cytB'] == 0 },
+                // every read ends up in exactly one emitted file
+                { assert counts.values().sum() == report.read_counts.input },
+                { assert snapshot(counts).match() }
+            )
+        }
+    }
+}

@@ -4,7 +4,24 @@
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {
-                "nf-core": {}
+                "nf-core": {
+                    "seqkit/fq2fa": {
+                        "branch": "master",
+                        "git_sha": "d07a945f421a4a91ce4e5a22db63e0e7f8741607",
+                        "installed_by": ["modules"]
+                    },
+                    "vsearch/cluster": {
+                        "branch": "master",
+                        "git_sha": "3a0ac08f5e8a748df4bc8b3998623121adec36fe",
+                        "installed_by": ["modules"],
+                        "patch": "modules/nf-core/vsearch/cluster/vsearch-cluster.diff"
+                    },
+                    "vsearch/dereplicate": {
+                        "branch": "master",
+                        "git_sha": "3a0ac08f5e8a748df4bc8b3998623121adec36fe",
+                        "installed_by": ["modules"]
+                    }
+                }
             },
             "subworkflows": {
                 "nf-core": {

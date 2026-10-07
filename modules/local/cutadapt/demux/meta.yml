@@ -1,0 +1,85 @@
+name: "cutadapt_demux"
+description: Demultiplex long reads of a single sample into targets (amplicons) by
+  linked primer adapters using cutadapt
+keywords:
+  - demultiplex
+  - amplicon
+  - cutadapt
+  - primers
+tools:
+  - cutadapt:
+      description: Cutadapt removes adapter sequences from sequencing reads
+      homepage: https://cutadapt.readthedocs.io
+      documentation: https://cutadapt.readthedocs.io/en/stable/guide.html
+      doi: 10.14806/ej.17.1.200
+      licence: ["MIT"]
+      identifier: biotools:cutadapt
+input:
+  - - meta:
+        type: map
+        description: Groovy Map containing sample information e.g. [ id:'test' ]
+    - reads:
+        type: file
+        description: Single-end long reads, one file per sample
+        pattern: "*.{fastq,fq}.gz"
+        ontologies: []
+  - adapters:
+      type: file
+      description: Fasta with one linked adapter per target, header is the target
+        name (must not be 'unknown'), e.g. `>COI` then `FWD...revcomp(REV)`
+      pattern: "*.{fasta,fa}"
+      ontologies: []
+output:
+  reads:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information e.g. [ id:'test' ]
+      - "${prefix}.*.fastq.gz":
+          type: file
+          description: Reads assigned to each target, named <prefix>.<target>.fastq.gz.
+            Reads matching no target are written by cutadapt to <prefix>.unknown.fastq.gz.
+            Empty files are removed.
+          pattern: "*.fastq.gz"
+          ontologies: []
+  json:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information e.g. [ id:'test' ]
+      - "${prefix}.cutadapt.json":
+          type: file
+          description: Cutadapt JSON report with total and per-adapter read counts
+          pattern: "*.cutadapt.json"
+          ontologies:
+            - edam: http://edamontology.org/format_3464
+  log:
+    - - meta:
+          type: map
+          description: Groovy Map containing sample information e.g. [ id:'test' ]
+      - "${prefix}.cutadapt.log":
+          type: file
+          description: Cutadapt text report
+          pattern: "*.cutadapt.log"
+          ontologies: []
+  versions_cutadapt:
+    - - ${task.process}:
+          type: string
+          description: The process the versions were collected from
+      - cutadapt:
+          type: string
+          description: The tool name
+      - cutadapt --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+topics:
+  versions:
+    - - ${task.process}:
+          type: string
+          description: The process the versions were collected from
+      - cutadapt:
+          type: string
+          description: The tool name
+      - cutadapt --version:
+          type: eval
+          description: The expression to obtain the version of the tool
+authors:
+  - "@amakunin"

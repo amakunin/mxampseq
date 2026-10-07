@@ -1,0 +1,89 @@
+{
+    "four amplicons": {
+        "content": [
+            {
+                "test.COI.fastq.gz": 17,
+                "test.ITS2.fastq.gz": 29,
+                "test.unknown.fastq.gz": 10
+            }
+        ],
+        "timestamp": "2026-10-06T16:34:41.821349993",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    },
+    "stub": {
+        "content": [
+            {
+                "0": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.COI.fastq.gz:md5,3f429c10b6092023e8a098627bd4a870"
+                    ]
+                ],
+                "1": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.cutadapt.json:md5,8a80554c91d9fca8acb82f023de02f11"
+                    ]
+                ],
+                "2": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.cutadapt.log:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "3": [
+                    [
+                        "CUTADAPT_DEMUX",
+                        "cutadapt",
+                        "5.2"
+                    ]
+                ],
+                "json": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.cutadapt.json:md5,8a80554c91d9fca8acb82f023de02f11"
+                    ]
+                ],
+                "log": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.cutadapt.log:md5,d41d8cd98f00b204e9800998ecf8427e"
+                    ]
+                ],
+                "reads": [
+                    [
+                        {
+                            "id": "test"
+                        },
+                        "test.COI.fastq.gz:md5,3f429c10b6092023e8a098627bd4a870"
+                    ]
+                ],
+                "versions_cutadapt": [
+                    [
+                        "CUTADAPT_DEMUX",
+                        "cutadapt",
+                        "5.2"
+                    ]
+                ]
+            }
+        ],
+        "timestamp": "2026-10-06T16:26:01.73734772",
+        "meta": {
+            "nf-test": "0.9.5",
+            "nextflow": "26.04.0"
+        }
+    }
+}

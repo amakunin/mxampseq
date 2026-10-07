@@ -1,0 +1,59 @@
+Changes in component 'nf-core/vsearch/cluster'
+Changes in 'vsearch/cluster/main.nf':
+--- modules/nf-core/vsearch/cluster/main.nf
++++ modules/nf-core/vsearch/cluster/main.nf
+@@ -20,6 +20,7 @@
+     tuple val(meta), path('*.blast.tsv.gz')          , optional: true, emit: blast
+     tuple val(meta), path('*.uc.tsv.gz')             , optional: true, emit: uc
+     tuple val(meta), path('*.centroids.fasta.gz')    , optional: true, emit: centroids
++    tuple val(meta), path('*.consensus.fasta.gz')    , optional: true, emit: consensus
+     tuple val(meta), path('*.clusters.fasta*.gz')    , optional: true, emit: clusters
+     tuple val(meta), path('*.profile.txt.gz')        , optional: true, emit: profile
+     tuple val(meta), path('*.msa.fasta.gz')          , optional: true, emit: msa
+@@ -42,6 +43,7 @@
+                     args3.contains("--biomout") ? "biom" :
+                     args3.contains("--blast6out") ? "blast.tsv" :
+                     args3.contains("--centroids") ? "centroids.fasta" :
++                    args3.contains("--consout") ? "consensus.fasta" :
+                     args3.contains("--clusters") ? "clusters.fasta" :
+                     args3.contains("--mothur_shared_out") ? "mothur.tsv" :
+                     args3.contains("--msaout") ? "msa.fasta" :
+@@ -82,7 +84,7 @@
+                     args3.contains("--biomout") ? "biom.gz" :
+                     args3.contains("--blast6out") ? "blast.tsv.gz" :
+                     args3.contains("--centroids") ? "centroids.fasta.gz" :
+-                    args3.contains("--clusters") ? "clusters.fasta.gz" :
++                    args3.contains("--consout") ? "consensus.fasta.gz" :                    args3.contains("--clusters") ? "clusters.fasta.gz" :
+                     args3.contains("--mothur_shared_out") ? "mothur.tsv.gz" :
+                     args3.contains("--msaout") ? "msa.fasta.gz" :
+                     args3.contains("--otutabout") ? "otu.tsv.gz" :
+
+Changes in 'vsearch/cluster/meta.yml':
+--- modules/nf-core/vsearch/cluster/meta.yml
++++ modules/nf-core/vsearch/cluster/meta.yml
+@@ -141,6 +141,19 @@
+           pattern: "*.centroids.fasta.gz"
+           ontologies:
+             - edam: http://edamontology.org/format_3989
++  consensus:
++    - - meta:
++          type: map
++          description: |
++            Groovy Map containing sample information
++            e.g. [ id:'test' ]
++      - "*.consensus.fasta.gz":
++          type: file
++          description: Consensus sequences of each cluster in FASTA format
++            (written with --consout)
++          pattern: "*.consensus.fasta.gz"
++          ontologies:
++            - edam: http://edamontology.org/format_3989
+   clusters:
+     - - meta:
+           type: map
+
+'modules/nf-core/vsearch/cluster/environment.yml' is unchanged
+'modules/nf-core/vsearch/cluster/tests/nextflow.config' is unchanged
+'modules/nf-core/vsearch/cluster/tests/main.nf.test' is unchanged
+'modules/nf-core/vsearch/cluster/tests/main.nf.test.snap' is unchanged
+************************************************************
