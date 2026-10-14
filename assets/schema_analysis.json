@@ -25,6 +25,14 @@
                 "pattern": "^[ACGTRYSWKMBDHVNacgtryswkmbdhvn]+$",
                 "errorMessage": "Reverse primer is required and must be an IUPAC sequence without X anchors"
             },
+            "fastqfilter_params": {
+                "type": "string",
+                "default": "",
+                "pattern": "^[A-Za-z0-9 .=_-]*$",
+                "not": { "pattern": "(^|\\s)--(fastq_filter|fastaout|threads|fastq_qmax)(\\s|=|$)" },
+                "errorMessage": "fastqfilter_params may only contain letters, digits, spaces and . = _ - and must not set --fastq_filter, --fastaout, --threads or --fastq_qmax",
+                "meta": ["fastqfilter_params"]
+            },
             "clustering": {
                 "type": "string",
                 "enum": ["cluster_fast", "cluster_size", "cluster_smallmem", "cluster_unoise"],

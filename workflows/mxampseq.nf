@@ -7,6 +7,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mxampseq_pipeline'
 include { CUTADAPT_DEMUX         } from '../modules/local/cutadapt/demux'
+include { TARGET_CONSENSUS       } from '../subworkflows/local/target_consensus'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,8 +57,10 @@ workflow MXAMPSEQ {
             [ [ id: "${meta.id}_${target}", sample: meta.id, target: target ] + setup[target], fq ]
         }
 
-    // TODO: remove once the consensus subworkflow consumes ch_target_reads
-    ch_target_reads.view()
+    //
+    // SUBWORKFLOW: dereplicate and cluster each sample x target into consensus sequences
+    //
+    TARGET_CONSENSUS(ch_target_reads)
 
     //
     // Collate and save software versions

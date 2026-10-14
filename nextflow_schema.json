@@ -31,32 +31,16 @@
                     "mimetype": "application/x-yaml",
                     "pattern": "^\\S+\\.ya?ml$",
                     "description": "Path to YAML file with the list of targets, their primers and clustering settings.",
-                    "help_text": "A YAML list; each item has `target`, `forward_primer`, `reverse_primer`, `clustering` and optionally `clustering_params`.",
-                    "fa_icon": "fas fa-file-code"
+                    "help_text": "A YAML list; each item has `target`, `forward_primer`, `reverse_primer`, `clustering` and optionally `fastqfilter_params` and `clustering_params`."
                 },
-                        "demultiplexing_options": {
-            "title": "Demultiplexing options",
-            "type": "object",
-            "fa_icon": "fas fa-cut",
-            "description": "Options for separating reads into targets with cutadapt.",
-            "properties": {
-                "demux_params": {
+                "platform": {
                     "type": "string",
-                    "default": "",
-                    "pattern": "^[A-Za-z0-9 .=_-]*$",
-                    "not": { "pattern": "(^|\\s)(-o|--output|-g|--front|-a|--adapter|-b|--anywhere|-j|--cores|--json)(\\s|=|$)" },
-                    "description": "Additional cutadapt arguments, e.g. '-e 0.15 -O 10' or '--revcomp -e 0.15 -O 10'.",
-                    "help_text": "Output, adapter, core and report options are set by the pipeline and cannot be given here. Reads are not searched on the reverse strand unless `--revcomp` is given.",
-                    "fa_icon": "fas fa-sliders-h"
+                    "enum": ["ont", "pacbio"],
+                    "default": "ont",
+                    "description": "Sequencing platform used to generate the reads.",
+                    "help_text": "Currently used to select platform-aware filtering defaults and to keep ONT and PacBio workflows separable as pipeline logic expands.",
+                    "fa_icon": "fas fa-microchip"
                 },
-                "anchor_primers": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Anchor primers to read ends (adds cutadapt 'X' to both ends of each linked adapter).",
-                    "fa_icon": "fas fa-anchor"
-                }
-            }
-        },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
