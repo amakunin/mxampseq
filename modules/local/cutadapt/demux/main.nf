@@ -26,24 +26,30 @@ process CUTADAPT_DEMUX {
     def args = task.ext.args ?: ''
     prefix   = task.ext.prefix ?: "${meta.id}"
     """
-    cutadapt \\
-        --match-read-wildcards \\
-        -j $task.cpus \\
-        $args \\
-        -g file:$adapters \\
-        --json ${prefix}.cutadapt.json \\
-        -o "${prefix}.{name}.fastq.gz" \\
-        $reads \\
-        > ${prefix}.cutadapt.log
+    # check only for gzipped, plain unhandled
+    if [ -z "\$(gzip -dc $reads | head -c 1)" ]; then
+        echo "Input reads are empty; skipping cutadapt demultiplexing" > ${prefix}.cutadapt.log
+        echo '{}' > ${prefix}.cutadapt.json
+    else
+        cutadapt \\
+            --match-read-wildcards \\
+            -j $task.cpus \\
+            $args \\
+            -g file:$adapters \\
+            --json ${prefix}.cutadapt.json \\
+            -o "${prefix}.{name}.fastq.gz" \\
+            $reads \\
+            > ${prefix}.cutadapt.log
 
-    # drop empty outputs, downstream tools (vsearch) fail on empty input;
-    # counts per target (including zeros) remain available in the json report
-    for f in ${prefix}.*.fastq.gz; do
-        [ -e "\$f" ] || continue
-        if [ -z "\$(gzip -dc "\$f" | head -c 1)" ]; then
-            rm "\$f"
-        fi
-    done
+        # drop empty outputs, downstream tools (vsearch) fail on empty input;
+        # counts per target (including zeros) remain available in the json report
+        for f in ${prefix}.*.fastq.gz; do
+            [ -e "\$f" ] || continue
+            if [ -z "\$(gzip -dc "\$f" | head -c 1)" ]; then
+                rm "\$f"
+            fi
+        done
+    fi
     """
 
     stub:

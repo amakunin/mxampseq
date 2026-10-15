@@ -1,6 +1,6 @@
 process VSEARCH_FASTQFILTER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_single'
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
@@ -26,8 +26,7 @@ process VSEARCH_FASTQFILTER {
     vsearch \\
         --fastq_filter ${fastq} \\
         --fastaout ${prefix}.fasta \\
-        --threads $task.cpus \\
-        $args 2>&1 | tee ${prefix}.log
+        $args --no_progress 2>&1 | tee ${prefix}.log
     """
 
     stub:

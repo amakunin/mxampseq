@@ -1,5 +1,5 @@
 include { VSEARCH_FASTQFILTER } from '../../../modules/local/vsearch/fastqfilter'
-include { VSEARCH_DEREPLICATE } from '../../../modules/nf-core/vsearch/dereplicate'
+include { VSEARCH_DEREPLICATE } from '../../../modules/local/vsearch/dereplicate'
 include { VSEARCH_CLUSTER     } from '../../../modules/local/vsearch/cluster'
 
 //

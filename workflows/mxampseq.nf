@@ -52,10 +52,16 @@ workflow MXAMPSEQ {
     // Per sample x target meta carrying the target's clustering settings
     //
     def ch_target_reads = ch_demux.targeted
-        .combine(ch_targets)
+        .combine(ch_targets.map { setup -> [ setup ] })
         .map { meta, target, fq, setup ->
-            [ [ id: "${meta.id}_${target}", sample: meta.id, target: target ] + setup[target], fq ]
+            def target_setup = setup[target]
+            if (target_setup == null) {
+                error "Target '${target}' (sample ${meta.id}) not found in analysis setup"
+            }
+            [ [ id: "${meta.id}_${target}", sample: meta.id, target: target ] + target_setup, fq ]
         }
+
+    // ch_target_reads.view { meta, fq -> "target meta: ${meta}" }
 
     //
     // SUBWORKFLOW: dereplicate and cluster each sample x target into consensus sequences

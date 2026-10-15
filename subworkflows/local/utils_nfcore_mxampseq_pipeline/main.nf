@@ -111,7 +111,8 @@ workflow PIPELINE_INITIALISATION {
             meta + [
                 forward_primer: forward_primer.toUpperCase(),
                 reverse_primer: reverse_primer.toUpperCase(),
-                clustering_params: meta.clustering_params ?: ''
+                clustering_params: meta.clustering_params ?: '',
+                fastqfilter_params: meta.fastqfilter_params ?: ''
             ]
         }
 
@@ -134,7 +135,11 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_targets = channel.value(
         target_list.collectEntries { t ->
-            [ (t.target): [ clustering: t.clustering, clustering_params: t.clustering_params ] ]
+            [ (t.target): [ 
+                fastqfilter_params: t.fastqfilter_params, 
+                clustering: t.clustering, 
+                clustering_params: t.clustering_params  
+                ] ]
         }
     )
 

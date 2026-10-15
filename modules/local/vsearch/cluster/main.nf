@@ -17,6 +17,7 @@ process VSEARCH_CLUSTER {
     tuple val(meta), path('*.otu.tsv')            , optional: true, emit: otu
     tuple val(meta), path('*.profile.txt')        , optional: true, emit: profile
     tuple val(meta), path('*.out.tsv')            , optional: true, emit: out
+    tuple val(meta), path('*.log')                , emit: log
     tuple val("${task.process}"), val('vsearch'), eval('vsearch --version 2>&1 | sed -n "1s/.*v\\([0-9.]*\\).*/\\1/p"'), emit: versions_vsearch, topic: versions
     tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), emit: versions_samtools, topic: versions
 
@@ -61,7 +62,7 @@ process VSEARCH_CLUSTER {
         $args2 $fasta \\
         $out_args \\
         --threads $task.cpus \\
-        $args
+        $args --no_progress 2>&1 | tee ${prefix}.log
     """
 
     stub:
@@ -98,5 +99,6 @@ process VSEARCH_CLUSTER {
 
     """
     ${stub_lines}
+    touch ${prefix}.log
     """
 }

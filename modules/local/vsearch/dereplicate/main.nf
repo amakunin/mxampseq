@@ -28,7 +28,7 @@ process VSEARCH_DEREPLICATE {
         $args \\
         --relabel "${prefix}." \\
         --uc ${prefix}.uc \\
-        --output ${prefix}.fasta 2>&1 | tee ${prefix}.log
+        --output ${prefix}.fasta --no_progress 2>&1 | tee ${prefix}.log
     """
 
     stub:
