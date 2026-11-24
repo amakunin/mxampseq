@@ -25,6 +25,11 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Valid initialisation tests warn about `modules_testdata_base_path`, injected
   by `tests/nextflow.config` but absent from the parameter schema. Review this
   test-only setting separately rather than broadening validation exclusions.
+- Dereplication tests retain the imported public FASTA fixture from the
+  `phyloplace` branch of `nf-core/test-datasets`, including in the stub.
+  This is an unpinned external test-data dependency, not a pipeline runtime
+  dependency. Review replacement with a tracked synthetic fixture or pinning
+  to a dataset commit when improving fixture reproducibility.
 
 ## nf-core / Sanger ToL alignment
 
