@@ -19,8 +19,6 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 
 ### Observations and open questions
 
-- The verified farm environment selects nf-test 0.9.5, while
-  [CI](.github/workflows/nf-test.yml) selects 0.9.4. Decide whether to align them.
 - Passing pipeline-test baselines and Docker support have not been established.
 - Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
   establish reproducible pipeline fixtures.
