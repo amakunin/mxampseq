@@ -43,7 +43,9 @@
                 "type": "string",
                 "default": "",
                 "pattern": "^[A-Za-z0-9 .=_-]*$",
-                "not": { "pattern": "(^|\\s)--(sizein|sizeout|consout|threads|centroids|clusters|msaout|uc|otutabout|cluster_[a-z]+)(\\s|=|$)" },
+                "not": {
+                    "pattern": "(^|\\s)--(sizein|sizeout|consout|threads|centroids|clusters|msaout|uc|otutabout|cluster_[a-z]+)(\\s|=|$)"
+                },
                 "errorMessage": "clustering_params may only contain letters, digits, spaces and . = _ - and must not set --sizein, --sizeout, --consout, --threads, output flags or a cluster_* algorithm",
                 "meta": ["clustering_params"]
             }

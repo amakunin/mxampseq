@@ -66,7 +66,9 @@
                     "type": "string",
                     "default": "",
                     "pattern": "^[A-Za-z0-9 .=_-]*$",
-                    "not": { "pattern": "(^|\\s)(-o|--output|-g|--front|-a|--adapter|-b|--anywhere|-j|--cores|--json)(\\s|=|$)" },
+                    "not": {
+                        "pattern": "(^|\\s)(-o|--output|-g|--front|-a|--adapter|-b|--anywhere|-j|--cores|--json)(\\s|=|$)"
+                    },
                     "description": "Additional cutadapt arguments, e.g. '-e 0.15 -O 10' or '--revcomp -e 0.15 -O 10'.",
                     "help_text": "Output, adapter, core and report options are set by the pipeline and cannot be given here. Reads are not searched on the reverse strand unless `--revcomp` is given.",
                     "fa_icon": "fas fa-sliders-h"

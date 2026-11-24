@@ -12,7 +12,7 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 
 ### Remaining work
 
-- Establish hook checks and focused module/pipeline-test baselines under the
+- Establish focused module/pipeline-test baselines under the
   permissions in the agent guide.
 - Learn the distinctions between runtime tools, process containers, test
   fixtures, work directories and published results.
@@ -42,9 +42,6 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Replace template documentation and test profiles with mxampseq-specific
   content; establish small CI and representative full-data validation.
 - Review lint exclusions and CI assumptions individually.
-- Recheck user-run nf-core lint after the manifest and `.gitignore` corrections;
-  verify that no analysis modules are restored.
-- Review the pending RO-Crate README synchronisation when selecting commit scope.
 - Revisit the temporary `results_test/` exclusion after establishing isolated
   end-to-end test outputs.
 

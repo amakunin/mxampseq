@@ -135,10 +135,10 @@ workflow PIPELINE_INITIALISATION {
     //
     ch_targets = channel.value(
         target_list.collectEntries { t ->
-            [ (t.target): [ 
-                fastqfilter_params: t.fastqfilter_params, 
-                clustering: t.clustering, 
-                clustering_params: t.clustering_params  
+            [ (t.target): [
+                fastqfilter_params: t.fastqfilter_params,
+                clustering: t.clustering,
+                clustering_params: t.clustering_params
                 ] ]
         }
     )
@@ -299,4 +299,3 @@ def primersToAdaptersFasta(targets, anchor) {
         ">${t.target}\n${x}${t.forward_primer}...${reverseComplement(t.reverse_primer)}${x}\n"
     }.join('')
 }
-
