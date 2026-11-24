@@ -1,0 +1,2 @@
+sample_id,reads
+sample-1,tests/fixtures/cutadapt_demux/reads.fastq.gz

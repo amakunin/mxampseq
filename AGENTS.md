@@ -64,6 +64,9 @@ Pipeline development is a learning exercise for the developer.
 - Keep `docs/CONTRIBUTING.md` as the upstream nf-core template document.
   Do not add local development routines there or edit it unless explicitly
   requested; document local routines in this guide instead.
+- Keep this guide focused on general development practices and developer
+  interaction. Put task-specific commands, test selectors and acceptance checks
+  in milestones while work is active; remove them when resolved.
 - Retain only the evidence needed for unresolved work, distinguishing
   user-reported results from agent-observed results.
 
@@ -163,12 +166,6 @@ directory with the intended environment activated.
 git status --short --branch
 git diff
 
-# Run the focused test relevant to the change, for example:
-nf-test test modules/local/cutadapt/demux/tests/main.nf.test --profile +singularity
-
-# Escalate to the minimal pipeline test when needed.
-nf-test test tests/default.nf.test --profile +singularity
-
 # User-only repository lint:
 nf-core pipelines lint .
 
@@ -176,7 +173,10 @@ nf-core pipelines lint .
 prek run --all-files
 ```
 
-Use a supported container profile available in the environment. Local
+Start with the narrowest relevant test scope and escalate to pipeline testing
+when needed, within the agreed execution permissions. Keep fixtures reproducible
+and tracked rather than depending on ignored local inputs.
+Use a supported container profile when the selected tests need one. Local
 Singularity validation alone does not establish Docker support.
 For Nextflow changes, also follow upstream formatting guidance.
 Before pushing, require pipeline lint and appropriate pipeline-test evidence;
@@ -190,53 +190,12 @@ exclusions or regenerate snapshots just to obtain a passing result.
 Check required output shapes, identities and counts, not only successful exits.
 Documentation-only changes do not require pipeline execution.
 
-### Synthetic Cutadapt fixture
-
-The Cutadapt module tests use `tests/fixtures/cutadapt_demux/`, separate from
-the ignored local pipeline inputs in `tests/data/`. The plain FASTQ is the source:
-two COI reads, two ITS2 reads and one unassigned read, with artificial 20-base
-primer ends and known sequences/qualities. P3 and cytB have no matching reads.
-The stub uses a single COI adapter to preserve its existing output contract.
-
-The gzipped input is committed alongside the source. To reproduce it from the
-pipeline directory, use `gzip -n` to omit the source filename and timestamp:
-
-```bash
-gzip -n -c tests/fixtures/cutadapt_demux/reads.fastq \
-    > tests/fixtures/cutadapt_demux/reads.fastq.gz
-```
-
-Fixture changes require review of the explicit assertions before regenerating
-snapshots. These synthetic reads test exact demultiplexing and trimming, not
-real-read error tolerance or biological consensus behaviour.
-
-### Optional capture of focused test output
-
-For troubleshooting an approved test run, capture terminal output under the
-Git-ignored `.nf-test/` directory. This Bash example selects the Cutadapt module
-tests; replace the test path and log name for other approved scopes. Logging is
-optional and does not expand execution permissions.
-
-```bash
-mkdir -p .nf-test/logs
-(
-    set -o pipefail
-    nf-test test modules/local/cutadapt/demux/tests/main.nf.test \
-        --profile +singularity --verbose --ci \
-        2>&1 | tee .nf-test/logs/cutadapt-demux.log
-)
-```
-
-- `2>&1` captures stdout and stderr; `tee` also displays them in the terminal.
-- `pipefail` preserves failure status through the pipe. The subshell keeps this
-  setting local to the example.
-- `--ci` compares existing snapshots and fails rather than automatically
-  creating missing snapshots. Regeneration is a separate reviewed action.
-- The capture is overwritten on each run; use a different log name to retain
-  an earlier result.
-- `.nf-test/` and the separate root `.nf-test.log` are ignored by Git. Captures
-  are local diagnostics, not committed validation records or replacements for
-  per-test artefacts.
+When useful, capture stdout and stderr in a Git-ignored diagnostic location.
+Preserve command failure status when piping output, and avoid overwriting
+diagnostics still needed for investigation. Captures are local evidence, not
+committed validation records. Logging does not expand execution permissions.
+Use snapshot comparison without automatic updates for baseline checks;
+regeneration remains a separate reviewed action.
 
 ## Review and submission
 

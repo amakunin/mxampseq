@@ -24,8 +24,9 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Passing pipeline-test baselines and Docker support have not been established.
 - Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
   establish reproducible pipeline fixtures.
-- Full parameter/samplesheet validation remains unverified; module tests and
-  pipeline help do not exercise those validation paths.
+- Valid initialisation tests warn about `modules_testdata_base_path`, injected
+  by `tests/nextflow.config` but absent from the parameter schema. Review this
+  test-only setting separately rather than broadening validation exclusions.
 
 ## nf-core / Sanger ToL alignment
 

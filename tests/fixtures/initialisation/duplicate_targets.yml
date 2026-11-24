@@ -1,0 +1,8 @@
+- target: COI
+  forward_primer: ACGTCAGTACGATCGTACGA
+  reverse_primer: TCGACTAGCTAGTCAGGTAC
+  clustering: cluster_fast
+- target: COI
+  forward_primer: TTGACCGATGCTAGACCTGA
+  reverse_primer: GTCGAACTGTACCGAATCTG
+  clustering: cluster_size

@@ -17,10 +17,9 @@
                     "format": "file-path",
                     "exists": true,
                     "schema": "assets/schema_input.json",
-                    "mimetype": "text/tab-separated-values",
-                    "pattern": "^\\S+\\.tsv$",
-                    "description": "Path to tab-separated file linking sample IDs to read files.",
-                    "help_text": "Tab-separated file with a header row and two columns: `sample_id` and `reads` (path to a single-end `.fastq.gz`).",
+                    "pattern": "^\\S+\\.(tsv|csv)$",
+                    "description": "Path to a TSV or CSV samplesheet linking sample IDs to read files.",
+                    "help_text": "Tab-separated (.tsv) or comma-separated (.csv) file with a header row and two columns: `sample_id` and `reads` (path to a single-end `.fastq.gz`). Supply target definitions separately with `--analysis_setup`.",
                     "fa_icon": "fas fa-file-csv"
                 },
                 "analysis_setup": {

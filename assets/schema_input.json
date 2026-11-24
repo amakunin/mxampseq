@@ -21,7 +21,7 @@
                 "errorMessage": "Reads file must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
             }
         },
-        "required": ["sample_id", "reads"],
-        "uniqueEntries": ["sample_id"]
-    }
+        "required": ["sample_id", "reads"]
+    },
+    "uniqueEntries": ["sample_id"]
 }

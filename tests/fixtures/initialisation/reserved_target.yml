@@ -1,0 +1,4 @@
+- target: unknown
+  forward_primer: ACGTCAGTACGATCGTACGA
+  reverse_primer: TCGACTAGCTAGTCAGGTAC
+  clustering: cluster_fast

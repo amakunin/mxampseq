@@ -1,0 +1,293 @@
+nextflow_workflow {
+
+    name "Test Workflow PIPELINE_INITIALISATION"
+    script "../main.nf"
+    workflow "PIPELINE_INITIALISATION"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "initialisation"
+
+    test("valid TSV and analysis YAML") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/analysis.yml"
+                demux_params = '-e 0 -O 20'
+                anchor_primers = true
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 0 },
+                {
+                    assert workflow.out.samplesheet.size() == 1
+                    assert workflow.out.samplesheet[0][0] == [id: 'sample-1', demux_params: '-e 0 -O 20']
+                    assert workflow.out.samplesheet[0][1].toString().endsWith('/tests/fixtures/cutadapt_demux/reads.fastq.gz')
+                },
+                {
+                    assert workflow.out.targets == [[
+                        COI: [fastqfilter_params: '', clustering: 'cluster_fast', clustering_params: '--id 0.97'],
+                        ITS2: [fastqfilter_params: '--fastq_minlen 20', clustering: 'cluster_size', clustering_params: '']
+                    ]]
+                },
+                {
+                    assert workflow.out.adapters.size() == 1
+                    assert path(workflow.out.adapters[0]).readLines() == [
+                        '>COI',
+                        'XACGTCAGTACGATCGTACGA...GTACCTGACTAGCTAGTCGAX',
+                        '>ITS2',
+                        'XTTGACCGATGCTAGACCTGA...CAGATTCGGTACAGTTCGACX'
+                    ]
+                }
+            )
+        }
+    }
+
+    test("valid CSV and analysis YAML") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.csv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/analysis.yml"
+                demux_params = '-e 0 -O 20'
+                anchor_primers = true
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.csv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 0 },
+                {
+                    assert workflow.out.samplesheet.size() == 1
+                    assert workflow.out.samplesheet[0][0] == [id: 'sample-1', demux_params: '-e 0 -O 20']
+                    assert workflow.out.samplesheet[0][1].toString().endsWith('/tests/fixtures/cutadapt_demux/reads.fastq.gz')
+                },
+                {
+                    assert workflow.out.targets == [[
+                        COI: [fastqfilter_params: '', clustering: 'cluster_fast', clustering_params: '--id 0.97'],
+                        ITS2: [fastqfilter_params: '--fastq_minlen 20', clustering: 'cluster_size', clustering_params: '']
+                    ]]
+                },
+                {
+                    assert workflow.out.adapters.size() == 1
+                    assert path(workflow.out.adapters[0]).readLines() == [
+                        '>COI',
+                        'XACGTCAGTACGATCGTACGA...GTACCTGACTAGCTAGTCGAX',
+                        '>ITS2',
+                        'XTTGACCGATGCTAGACCTGA...CAGATTCGGTACAGTTCGACX'
+                    ]
+                }
+            )
+        }
+    }
+
+    test("reject duplicate sample IDs") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/analysis.yml"
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/duplicate_samples.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stderr.any { it.contains('Detected duplicate entries: [sample_id:sample-1]') } },
+                { assert !workflow.stderr.any { it.contains('does not exist') } }
+            )
+        }
+    }
+
+    test("reject duplicate target names") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/duplicate_targets.yml"
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stderr.any { it.contains('Detected duplicate entries: [target:COI]') } },
+                { assert !workflow.stderr.any { it.contains('does not exist') } }
+            )
+        }
+    }
+
+    test("reject reserved target name") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/reserved_target.yml"
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stderr.any { it.contains("Error for field 'target' (unknown)") } },
+                { assert !workflow.stderr.any { it.contains('does not exist') } }
+            )
+        }
+    }
+
+    test("reject protected Cutadapt output flag") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/analysis.yml"
+                demux_params = '-o forbidden.fastq.gz'
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stderr.any { it.contains('* --demux_params (-o forbidden.fastq.gz):') } },
+                { assert !workflow.stderr.any { it.contains('does not exist') } }
+            )
+        }
+    }
+}

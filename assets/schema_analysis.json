@@ -51,7 +51,7 @@
             }
         },
         "required": ["target", "forward_primer", "reverse_primer", "clustering"],
-        "additionalProperties": false,
-        "uniqueEntries": ["target"]
-    }
+        "additionalProperties": false
+    },
+    "uniqueEntries": ["target"]
 }
