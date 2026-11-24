@@ -25,8 +25,7 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
   establish reproducible pipeline fixtures.
 - Module tests warned about a null publishing directory and unrecognised
-  `validation` settings. The Cutadapt Conda path references `environment.yml`,
-  but the module file is `environment.yaml`; Singularity does not validate this.
+  `validation` settings.
 
 ## nf-core / Sanger ToL alignment
 
