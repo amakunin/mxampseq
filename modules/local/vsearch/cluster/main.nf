@@ -26,12 +26,12 @@ process VSEARCH_CLUSTER {
 
     script:
     def args = task.ext.args ?: ''
-    def args2 = task.ext.args2 ?: ''
+    def clustering = task.ext.args2 ?: ''
     def output_flags = (task.ext.args3 ?: '').tokenize()
     def prefix = task.ext.prefix ?: "${meta.id}"
 
-    if (!(args2.contains("--cluster_fast") || args2.contains("--cluster_size") || args2.contains("--cluster_smallmem") || args2.contains("--cluster_unoise"))) {
-        error "Unknown clustering option provided (${args2})"
+    if (!(clustering.contains("--cluster_fast") || clustering.contains("--cluster_size") || clustering.contains("--cluster_smallmem") || clustering.contains("--cluster_unoise"))) {
+        error "Unknown clustering option provided (${clustering}); must be one of --cluster_fast, --cluster_size, --cluster_smallmem, or --cluster_unoise"
     }
     if (!output_flags) {
         error "No vsearch output flags provided; set task.ext.args3 to one or more valid output flags such as --consout --centroids --uc"
@@ -59,7 +59,7 @@ process VSEARCH_CLUSTER {
 
     """
     vsearch \\
-        $args2 $fasta \\
+        $clustering $fasta \\
         $out_args \\
         --threads $task.cpus \\
         $args --no_progress 2>&1 | tee ${prefix}.log
