@@ -41,12 +41,28 @@ Pipeline development is a learning exercise for the developer.
 - Explain relevant commands and their results. Distinguish observed evidence
   from assumptions and proposed validation.
 - Keep changes focused and reviewable. Avoid incidental refactoring.
-- Update directly related documentation and tests alongside behaviour changes.
+- Include directly related documentation and tests in the approved code change.
+  Update this guide and milestones alongside the work when relevant, without
+  separate approval rounds for factual results, observations or already agreed
+  decisions. Keep documentation in the reviewable diff; do not defer routine
+  recording to another chat interaction.
 - Ask before making scientific, architectural or release-policy decisions.
-- Changes to this agent guide follow the same proposal, approval, edit and
-  review cycle. Do not broaden agent permissions autonomously.
+- New working rules or permission changes in this guide still require explicit
+  approval and review. Do not broaden agent permissions autonomously.
 - Routine exceptions require explicit agreement with a defined scope. Do not
   infer permission from repeated approvals.
+
+## Documentation roles
+
+- Keep milestones as an active roadmap and handoff: planned work, unresolved
+  decisions, validation gaps and findings needed to avoid repeating investigation.
+- Remove resolved milestone notes alongside completed work. Do not accumulate
+  command transcripts, completed-work tables or duplicate commit summaries.
+- Put completed changes, rationale and validation evidence in commits/PRs.
+  Keep durable setup, usage and output instructions in contributor/user docs;
+  keep working rules and execution boundaries in this guide.
+- Retain only the evidence needed for unresolved work, distinguishing
+  user-reported results from agent-observed results.
 
 ## Manual edits and coordination
 
@@ -120,6 +136,10 @@ Use isolated output/work directories and appropriate compute resources.
   machine-specific environment paths out of this shared guide.
 - Full-scale pipeline tests are user-only. The agent may prepare commands and
   analyse user-provided results, but must not launch these tests.
+- nf-core pipeline lint is also user-only. The agent may explain commands and
+  analyse supplied output/logs, but must not run it. In nf-core 4.1.0, a run
+  without `--fix` reinstalled missing manifest modules and synchronised RO-Crate
+  metadata. Do not treat diagnostic lint as read-only.
 - Read-only inspection does not authorise execution of tests or modifying tools.
   Agree permissions for other execution explicitly, including bounded tests.
 - Before executing commands with uncertain resource costs or side effects,
@@ -146,8 +166,10 @@ nf-test test modules/local/cutadapt/demux/tests/main.nf.test --profile +singular
 # Escalate to the minimal pipeline test when needed.
 nf-test test tests/default.nf.test --profile +singularity
 
-# Run repository checks before submission.
+# User-only repository lint:
 nf-core pipelines lint .
+
+# Hook checks require separate execution approval.
 prek run --all-files
 ```
 
