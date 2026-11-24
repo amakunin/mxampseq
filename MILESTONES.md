@@ -150,19 +150,10 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Validate mixed-method targets and method-specific setting combinations.
 - Agree published outputs versus work-only intermediates.
 - Complete reporting, usage/output documentation and tool citations.
-- Review the software-version output contract and its test expectations.
 
 ### Observations and open questions
 
-- [The workflow](workflows/mxampseq.nf) already collects version-topic records and
-  workflow/runtime information into
-  `pipeline_info/nf_core_mxampseq_software_versions.yml`. This implementation has
-  not been verified in a current pipeline run.
-- The returned `ch_collated_versions` channel is unused; removing the entire
-  operator chain would remove file collection. No change was made.
-- The workflow emits the empty `ch_versions` channel rather than the collected
-  file. Decide the intended downstream interface before changing this.
-- [The pipeline test](tests/default.nf.test) expects
-  `nf_core_mxampseq_software_mqc_versions.yml`, which differs from the workflow
-  filename. Resolve the contract and test together.
+- Verify per-process tool-version entries during a non-empty workflow run and
+  the corrected report filename in the pipeline test; empty-input reporting
+  does not establish these execution paths.
 - Which raw/intermediate files should be published rather than retained in work?

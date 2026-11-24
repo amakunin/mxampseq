@@ -1,0 +1,46 @@
+nextflow_workflow {
+
+    name "Test workflow software-version report"
+    script "../workflows/mxampseq.nf"
+    workflow "MXAMPSEQ"
+
+    tag "workflows"
+    tag "software_versions"
+
+    test("emit the published report without analysis tasks") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = channel.empty()
+                input[1] = file("\$projectDir/tests/fixtures/cutadapt_demux/adapters.fasta", checkIfExists: true)
+                input[2] = channel.value([:])
+                input[3] = params.outdir
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert workflow.trace.tasks().size() == 0
+            assert workflow.out.versions.size() == 1
+            def report = path(workflow.out.versions[0])
+            def published = path("$outputDir/pipeline_info/nf_core_mxampseq_software_versions.yml")
+            assert report.toRealPath() == published.toRealPath()
+
+            def versions = nf_core.nf.test.utils.Methods.readYamlFile(report.toString())
+            assert versions != null
+            assert versions.keySet() == ['Workflow'] as Set
+            assert versions.Workflow.keySet() == ['nf-core/mxampseq', 'Nextflow'] as Set
+            assert versions.Workflow['nf-core/mxampseq'].startsWith('v')
+            assert versions.Workflow.Nextflow instanceof String
+            assert !versions.Workflow.Nextflow.isBlank()
+            assert removeNextflowVersion(report.toString()) == [
+                Workflow: ['nf-core/mxampseq': versions.Workflow['nf-core/mxampseq']]
+            ]
+        }
+    }
+}

@@ -97,7 +97,7 @@ workflow MXAMPSEQ {
             newLine: true
         )
     emit:
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
+    versions       = ch_collated_versions        // channel: path(software versions YAML)
 }
 
 /*

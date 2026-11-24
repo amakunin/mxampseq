@@ -20,8 +20,8 @@ nextflow_pipeline {
             assert workflow.success
             assertAll(
                 { assert snapshot(
-                    // pipeline versions.yml file for multiqc from which Nextflow version is removed because we test pipelines on multiple Nextflow versions
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_mxampseq_software_mqc_versions.yml"),
+                    // Remove the runtime version because CI tests multiple Nextflow versions.
+                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_mxampseq_software_versions.yml"),
                     // All stable path name, with a relative path
                     stable_path,
                     // All files with stable contents
