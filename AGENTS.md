@@ -112,17 +112,25 @@ This may be a shared compute environment. Locate existing development
 environments before installing tools. Do not modify shared installations.
 Use isolated output/work directories and appropriate compute resources.
 
+- The initial development baseline is Nextflow 26.04.0 with the strict syntax
+  parser. Nextflow 25 compatibility is not required. Do not enable the legacy
+  parser to bypass migration problems.
+- Select the agreed environment explicitly for each agent command session.
+  Do not assume activation in the user's terminal is inherited. Keep
+  machine-specific environment paths out of this shared guide.
 - Full-scale pipeline tests are user-only. The agent may prepare commands and
   analyse user-provided results, but must not launch these tests.
 - Read-only inspection does not authorise execution of tests or modifying tools.
   Agree permissions for other execution explicitly, including bounded tests.
 - Before executing commands with uncertain resource costs or side effects,
   explain them and obtain approval. This includes formatters, hooks,
-  installations, downloads, snapshot updates, job submission and Git mutations.
+  installations, downloads, snapshot updates and job submission. Git-writing
+  operations are user-only, as specified below.
 - Do not assume that lint or test commands are harmless. If a validation scope
   is unclear, clarify it before execution.
 
-Check tool versions against the repository's CI and template configuration.
+Verify the selected runtime and parser against the agreed baseline. Compare
+other tool versions with CI and template configuration, and report mismatches.
 Commands below are starting points, not claims of successful validation.
 They do not grant execution permission. Run approved commands from the pipeline
 directory with the intended environment activated.
@@ -160,10 +168,13 @@ Documentation-only changes do not require pipeline execution.
 ## Review and submission
 
 - Review the complete diff and validation results with the developer.
-- Before committing, obtain approval to stage and commit only agreed files,
-  and require hook-check evidence within the execution permissions above.
+- All Git-writing operations are user-only, including staging, commits,
+  branch creation/switching, merges, rebases, resets, tags and pushes. The agent
+  may inspect Git state and explain commands, but must not execute these writes.
+- Before the developer commits, review the intended files and require
+  hook-check evidence within the execution permissions above.
 - Keep each commit to one logical change with a concise imperative title.
-- Obtain permission before pushing or opening a PR.
+- Obtain permission before opening a PR; pushing remains user-only.
 - Follow the PR template, include relevant changelog/citation updates and wait
   for human review and required CI checks.
 - Follow upstream disclosure guidance for substantial agent-generated code.

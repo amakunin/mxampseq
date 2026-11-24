@@ -19,7 +19,7 @@ workflow TARGET_CONSENSUS {
     VSEARCH_FASTQFILTER(ch_target_reads)
 
     // Only dereplicate if the filtered fasta is not empty
-    VSEARCH_DEREPLICATE(VSEARCH_FASTQFILTER.out.fasta.filter { meta, file -> file.size() > 0 })
+    VSEARCH_DEREPLICATE(VSEARCH_FASTQFILTER.out.fasta.filter { _meta, file -> file.size() > 0 })
 
     VSEARCH_CLUSTER(VSEARCH_DEREPLICATE.out.fasta)
 

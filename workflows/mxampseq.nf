@@ -43,7 +43,7 @@ workflow MXAMPSEQ {
                 [ meta, target, fq ]
             }
         }
-        .branch { meta, target, fq ->
+        .branch { _meta, target, _fq ->
             unknown: target == 'unknown'
             targeted: true
         }
