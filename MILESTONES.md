@@ -24,8 +24,9 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Passing pipeline-test baselines and Docker support have not been established.
 - Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
   establish reproducible pipeline fixtures.
-- Module tests warned about a null publishing directory and unrecognised
-  `validation` settings.
+- Investigate the unrecognised `validation` settings under Nextflow 26.04.0.
+  The test log confirms nf-schema 2.5.1 loads, and that version's documentation
+  lists both settings; do not remove them solely to suppress warnings.
 
 ## nf-core / Sanger ToL alignment
 
