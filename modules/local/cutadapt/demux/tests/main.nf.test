@@ -17,8 +17,8 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [ [ id:'test' ], file("\$projectDir/tests/data/demux/stub.fastq.gz", checkIfExists: true) ]
-                input[1] = file("\$projectDir/tests/data/demux/adapters.fasta", checkIfExists: true)
+                input[0] = [ [ id:'test' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ]
+                input[1] = file("\$projectDir/tests/fixtures/cutadapt_demux/stub_adapters.fasta", checkIfExists: true)
                 """
             }
         }
@@ -38,26 +38,38 @@ nextflow_process {
         when {
             process {
                 """
-                input[0] = [ [ id:'test', demux_params:'-e 0.15 -O 10' ], file("\$projectDir/tests/data/demux/four_amplicons.fastq.gz", checkIfExists: true) ]
-                input[1] = file("\$projectDir/tests/data/demux/four_amplicons_adapters.fasta", checkIfExists: true)
+                input[0] = [ [ id:'test', demux_params:'-e 0 -O 20' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ]
+                input[1] = file("\$projectDir/tests/fixtures/cutadapt_demux/adapters.fasta", checkIfExists: true)
                 """
             }
         }
 
         then {
             def files  = process.out.reads.collect { meta, fqs -> [ fqs ].flatten() }.flatten()
-            def counts = files.collectEntries { fq -> [ (new File(fq.toString()).name): path(fq.toString()).linesGzip.size().intdiv(4) ] }.sort()
+            def contents = files.collectEntries { fq -> [ (new File(fq.toString()).name): path(fq.toString()).linesGzip ] }
+            def counts = contents.collectEntries { name, lines -> [ (name): lines.size().intdiv(4) ] }.sort()
+            def quality = 'I' * 20
+            def expected = [
+                'test.COI.fastq.gz': [
+                    '@coi_1', 'GATTACAGATTACAGATTAC', '+', quality,
+                    '@coi_2', 'CCGGAATTCCGGAATTCCGG', '+', quality
+                ],
+                'test.ITS2.fastq.gz': [
+                    '@its2_1', 'ATATCGCGATATCGCGATAT', '+', quality,
+                    '@its2_2', 'GGCCAATTGGCCAATTGGCC', '+', quality
+                ],
+                'test.unknown.fastq.gz': ['@unknown', 'TTTTTTTTTTTTTTTTTTTT', '+', quality]
+            ]
             def report = path(process.out.json[0][1]).json
             def matches = report.adapters_read1.collectEntries { a -> [ (a.name): a.total_matches ] }
             assertAll(
                 { assert process.success },
-                // present: targets with reads and the unassigned reads
-                { assert counts.keySet().containsAll(['test.COI.fastq.gz', 'test.ITS2.fastq.gz', 'test.unknown.fastq.gz']) },
-                // absent: targets without reads are not emitted
-                { assert !counts.keySet().any { it.contains('.P3.') || it.contains('.cytB.') } },
+                { assert contents == expected },
+                { assert process.out.reads.every { meta, fqs -> meta == [ id:'test', demux_params:'-e 0 -O 20' ] } },
                 // the cutadapt report confirms they really had no matches
                 { assert matches['P3'] == 0 && matches['cytB'] == 0 },
                 // every read ends up in exactly one emitted file
+                { assert report.read_counts.input == 5 },
                 { assert counts.values().sum() == report.read_counts.input },
                 { assert snapshot(counts).match() }
             )

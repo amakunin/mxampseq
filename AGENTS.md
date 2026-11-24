@@ -19,7 +19,7 @@ Also read these sources when the task involves their scope:
   for pipeline-level standards.
 - [nf-core AI contribution policy](https://nf-co.re/blog/2026/statement-on-ai):
   the human contributor must understand and review submitted code.
-- [Local contribution guide](docs/CONTRIBUTING.md) and
+- [Upstream template contribution guide](docs/CONTRIBUTING.md) and
   [development milestones](MILESTONES.md) for project context.
 
 Upstream guidance can change. Surface consequential changes or conflicts before
@@ -59,8 +59,11 @@ Pipeline development is a learning exercise for the developer.
 - Remove resolved milestone notes alongside completed work. Do not accumulate
   command transcripts, completed-work tables or duplicate commit summaries.
 - Put completed changes, rationale and validation evidence in commits/PRs.
-  Keep durable setup, usage and output instructions in contributor/user docs;
-  keep working rules and execution boundaries in this guide.
+  Keep durable usage and output instructions in user docs; keep local development
+  setup, routines, working rules and execution boundaries in this guide.
+- Keep `docs/CONTRIBUTING.md` as the upstream nf-core template document.
+  Do not add local development routines there or edit it unless explicitly
+  requested; document local routines in this guide instead.
 - Retain only the evidence needed for unresolved work, distinguishing
   user-reported results from agent-observed results.
 
@@ -186,6 +189,54 @@ Report missing tools and baseline failures explicitly. Do not broaden lint
 exclusions or regenerate snapshots just to obtain a passing result.
 Check required output shapes, identities and counts, not only successful exits.
 Documentation-only changes do not require pipeline execution.
+
+### Synthetic Cutadapt fixture
+
+The Cutadapt module tests use `tests/fixtures/cutadapt_demux/`, separate from
+the ignored local pipeline inputs in `tests/data/`. The plain FASTQ is the source:
+two COI reads, two ITS2 reads and one unassigned read, with artificial 20-base
+primer ends and known sequences/qualities. P3 and cytB have no matching reads.
+The stub uses a single COI adapter to preserve its existing output contract.
+
+The gzipped input is committed alongside the source. To reproduce it from the
+pipeline directory, use `gzip -n` to omit the source filename and timestamp:
+
+```bash
+gzip -n -c tests/fixtures/cutadapt_demux/reads.fastq \
+    > tests/fixtures/cutadapt_demux/reads.fastq.gz
+```
+
+Fixture changes require review of the explicit assertions before regenerating
+snapshots. These synthetic reads test exact demultiplexing and trimming, not
+real-read error tolerance or biological consensus behaviour.
+
+### Optional capture of focused test output
+
+For troubleshooting an approved test run, capture terminal output under the
+Git-ignored `.nf-test/` directory. This Bash example selects the Cutadapt module
+tests; replace the test path and log name for other approved scopes. Logging is
+optional and does not expand execution permissions.
+
+```bash
+mkdir -p .nf-test/logs
+(
+    set -o pipefail
+    nf-test test modules/local/cutadapt/demux/tests/main.nf.test \
+        --profile +singularity --verbose --ci \
+        2>&1 | tee .nf-test/logs/cutadapt-demux.log
+)
+```
+
+- `2>&1` captures stdout and stderr; `tee` also displays them in the terminal.
+- `pipefail` preserves failure status through the pipe. The subshell keeps this
+  setting local to the example.
+- `--ci` compares existing snapshots and fails rather than automatically
+  creating missing snapshots. Regeneration is a separate reviewed action.
+- The capture is overwritten on each run; use a different log name to retain
+  an earlier result.
+- `.nf-test/` and the separate root `.nf-test.log` are ignored by Git. Captures
+  are local diagnostics, not committed validation records or replacements for
+  per-test artefacts.
 
 ## Review and submission
 

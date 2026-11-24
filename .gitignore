@@ -11,3 +11,4 @@ null/
 .nf-test/
 
 results_test/
+.nf-test.log

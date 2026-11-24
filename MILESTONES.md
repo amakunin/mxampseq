@@ -12,7 +12,7 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 
 ### Remaining work
 
-- Establish focused module/pipeline-test baselines under the
+- Establish the remaining focused module/pipeline-test baselines under the
   permissions in the agent guide.
 - Learn the distinctions between runtime tools, process containers, test
   fixtures, work directories and published results.
@@ -21,8 +21,12 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 
 - The verified farm environment selects nf-test 0.9.5, while
   [CI](.github/workflows/nf-test.yml) selects 0.9.4. Decide whether to align them.
-- Pipeline/module execution and Docker support have not been validated in the
-  current development session; syntax checks alone do not establish correctness.
+- Passing pipeline-test baselines and Docker support have not been established.
+- Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
+  establish reproducible pipeline fixtures.
+- Module tests warned about a null publishing directory and unrecognised
+  `validation` settings. The Cutadapt Conda path references `environment.yml`,
+  but the module file is `environment.yaml`; Singularity does not validate this.
 
 ## nf-core / Sanger ToL alignment
 
