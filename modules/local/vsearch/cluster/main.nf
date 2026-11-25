@@ -2,6 +2,7 @@ process VSEARCH_CLUSTER {
     tag "$meta.id"
     label 'process_low'
 
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/vsearch:2.31.0--hd2be7a0_0' :
         'quay.io/biocontainers/vsearch:2.31.0--hd2be7a0_0' }"
@@ -19,7 +20,6 @@ process VSEARCH_CLUSTER {
     tuple val(meta), path('*.out.tsv')            , optional: true, emit: out
     tuple val(meta), path('*.log')                , emit: log
     tuple val("${task.process}"), val('vsearch'), eval('vsearch --version 2>&1 | sed -n "1s/.*v\\([0-9.]*\\).*/\\1/p"'), emit: versions_vsearch, topic: versions
-    tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), emit: versions_samtools, topic: versions
 
     when:
     task.ext.when == null || task.ext.when

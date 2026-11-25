@@ -9,19 +9,32 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 ### Goal and agreed decisions
 
 - Establish an understandable, reproducible development and review cycle.
+- Prioritise a small end-to-end smoke test and focused tests for changed
+  behaviour over comprehensive coverage of interfaces still in development.
+- Add tests for each feature's agreed contracts as the feature is implemented.
+  Defer release-level coverage and representative full-data validation.
 
 ### Remaining work
 
-- Establish the remaining focused module/pipeline-test baselines under the
-  permissions in the agent guide.
+- Establish a reproducible minimal pipeline test that checks successful
+  execution, non-empty analysis output and sample/target separation.
+- Run existing focused tests when relevant to the change, within the permissions
+  in the agent guide.
 - Learn the distinctions between runtime tools, process containers, test
   fixtures, work directories and published results.
 
 ### Observations and open questions
 
-- Passing pipeline-test baselines and Docker support have not been established.
-- Local pipeline inputs in `tests/data/` remain ignored and absent from Git;
-  establish reproducible pipeline fixtures.
+- A reproducible pipeline-test baseline and Docker support have not been
+  established.
+- A local copy of pipeline inputs is available in `tests/data/`, but remains
+  ignored and absent from Git. Before release, select reproducible fixtures,
+  verify their provenance and decide whether to track or host them externally.
+- Assess whether existing synthetic reads exercise the VSEARCH path through to
+  non-empty results. Discuss snapshot scope before fixing evolving intermediate
+  files or exact scientific outputs as test expectations.
+- An agent-run local Conda test completed with the copied inputs and produced
+  non-empty sample-by-target nonchimera files. The inputs remain untracked.
 - Valid initialisation tests warn about `modules_testdata_base_path`, injected
   by `tests/nextflow.config` but absent from the parameter schema. Review this
   test-only setting separately rather than broadening validation exclusions.
@@ -158,7 +171,6 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 
 ### Observations and open questions
 
-- Verify per-process tool-version entries during a non-empty workflow run and
-  the corrected report filename in the pipeline test; empty-input reporting
-  does not establish these execution paths.
+- Verify the report filename and per-process tool-version entries in the
+  reproducible pipeline test, including the absence of unrelated tools.
 - Which raw/intermediate files should be published rather than retained in work?
