@@ -7,26 +7,35 @@ nextflow_pipeline {
     test("-profile test") {
 
         when {
+            def dataDir = new File("$moduleTestDir/data/demux")
+            def samplesheet = new File("$launchDir/samplesheet.tsv")
+            samplesheet.text = new File(dataDir, 'samplesheet.tsv').text.replace(
+                'tests/data/demux/', "${dataDir.absolutePath}/"
+            )
             params {
                 outdir = "$outputDir"
+                input = samplesheet.absolutePath
             }
         }
 
         then {
-            // stable_path: All files + folders in ${params.outdir}/ with a stable path (including file name)
-            def stable_path = getAllFilesFromDir(params.outdir, relative: true, includeDir: true, ignore: ['pipeline_info/*.{html,json,txt}'])
-            // stable_content: All files in ${params.outdir}/ with stable content
-            def stable_content = getAllFilesFromDir(params.outdir, ignoreFile: 'tests/.nftignore')
-            assert workflow.success
+            def nonchimeras = [
+                'targets/COI/uchime3_denovo/test_COI.nonchimeras.fasta',
+                'targets/COI/uchime3_denovo/test2_COI.nonchimeras.fasta',
+                'targets/ITS2/uchime3_denovo/test_ITS2.nonchimeras.fasta',
+                'targets/ITS2/uchime3_denovo/test2_ITS2.nonchimeras.fasta'
+            ]
+            def report = "$outputDir/pipeline_info/nf_core_mxampseq_software_versions.yml"
             assertAll(
-                { assert snapshot(
-                    // Remove the runtime version because CI tests multiple Nextflow versions.
-                    removeNextflowVersion("$outputDir/pipeline_info/nf_core_mxampseq_software_versions.yml"),
-                    // All stable path name, with a relative path
-                    stable_path,
-                    // All files with stable contents
-                    stable_content
-                ).match() }
+                { assert workflow.success },
+                { assert nonchimeras.every { new File("$outputDir/$it").length() > 0 } },
+                {
+                    assert new File(report).isFile()
+                    def versions = nf_core.nf.test.utils.Methods.readYamlFile(report)
+                    assert versions.VSEARCH_CLUSTER.vsearch instanceof String
+                    assert !versions.VSEARCH_CLUSTER.vsearch.isBlank()
+                    assert !versions.VSEARCH_CLUSTER.containsKey('samtools')
+                }
             )
         }
     }

@@ -30,11 +30,13 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - A local copy of pipeline inputs is available in `tests/data/`, but remains
   ignored and absent from Git. Before release, select reproducible fixtures,
   verify their provenance and decide whether to track or host them externally.
-- Assess whether existing synthetic reads exercise the VSEARCH path through to
-  non-empty results. Discuss snapshot scope before fixing evolving intermediate
-  files or exact scientific outputs as test expectations.
-- An agent-run local Conda test completed with the copied inputs and produced
-  non-empty sample-by-target nonchimera files. The inputs remain untracked.
+  Consider a newer, smaller dataset that covers additional scenarios.
+- The pipeline nf-test prepares a temporary samplesheet with absolute read paths;
+  it does not verify the test profile's original relative paths from other
+  launch directories.
+- An agent-run pipeline nf-test passed with the local Conda profile and copied
+  inputs. It checks selected non-empty sample-by-target outputs and clustering
+  version reporting without snapshotting all intermediate files.
 - Valid initialisation tests warn about `modules_testdata_base_path`, injected
   by `tests/nextflow.config` but absent from the parameter schema. Review this
   test-only setting separately rather than broadening validation exclusions.
