@@ -1,0 +1,10 @@
+- target: COI
+  forward_primer: acgtcagtacgatcgtacga
+  reverse_primer: tcgactagctagtcaggtac
+  clustering: cluster_fast
+  clustering_params: '--id 0.97'
+- target: ITS2
+  forward_primer: ttgaccgatgctagacctga
+  reverse_primer: gtcgaactgtaccgaatctg
+  fastqfilter_params: '--fastq_minlen 20'
+  clustering: cluster_size

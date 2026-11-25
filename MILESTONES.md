@@ -28,8 +28,8 @@ Use Git history for past changes and [AGENTS.md](AGENTS.md) for working practice
 - Dereplication tests retain the imported public FASTA fixture from the
   `phyloplace` branch of `nf-core/test-datasets`, including in the stub.
   This is an unpinned external test-data dependency, not a pipeline runtime
-  dependency. Review replacement with a tracked synthetic fixture or pinning
-  to a dataset commit when improving fixture reproducibility.
+  dependency. Before release, review replacement with a tracked synthetic
+  fixture or pinning to a dataset commit.
 
 ## nf-core / Sanger ToL alignment
 
