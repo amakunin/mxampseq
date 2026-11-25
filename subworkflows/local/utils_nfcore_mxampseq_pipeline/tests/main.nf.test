@@ -37,6 +37,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -98,6 +99,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -157,6 +159,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -197,6 +200,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -237,6 +241,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -278,6 +283,7 @@ nextflow_workflow {
                 input[9] = false
                 input[10] = false
                 input[11] = false
+                input[12] = 'ont'
                 """
             }
         }
@@ -287,6 +293,46 @@ nextflow_workflow {
                 { assert workflow.failed },
                 { assert workflow.stderr.any { it.contains('* --demux_params (-o forbidden.fastq.gz):') } },
                 { assert !workflow.stderr.any { it.contains('does not exist') } }
+            )
+        }
+    }
+
+    test("reject unimplemented platform") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+                input = "$outputDir/samplesheet.tsv"
+                analysis_setup = "$projectDir/tests/fixtures/initialisation/analysis.yml"
+            }
+            workflow {
+                """
+                file(params.outdir).mkdirs()
+                file(params.input).text = file("\$projectDir/tests/fixtures/initialisation/samplesheet.tsv").text.replace(
+                    'tests/fixtures/cutadapt_demux/reads.fastq.gz',
+                    file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true).toString()
+                )
+                input[0] = false
+                input[1] = true
+                input[2] = true
+                input[3] = []
+                input[4] = params.outdir
+                input[5] = params.input
+                input[6] = params.analysis_setup
+                input[7] = params.demux_params
+                input[8] = params.anchor_primers
+                input[9] = false
+                input[10] = false
+                input[11] = false
+                input[12] = 'pacbio'
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.failed },
+                { assert workflow.stdout.any { it.contains("platform 'pacbio' is not implemented yet") } }
             )
         }
     }

@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/subworkflows/yaml-schema.json
+name: ont_preprocessing
+description: Sample-level ONT read preprocessing with adapter trimming and read filtering
+keywords:
+  - nanopore
+  - adapter trimming
+  - quality filtering
+  - preprocessing
+components:
+  - porechop/abi
+  - chopper
+input:
+  - ch_reads:
+      description: |
+        Channel with one element per sample
+        Structure: [ val(meta), path(fastq) ]
+  - skip_porechop_abi:
+      type: boolean
+      description: Skip adapter trimming with Porechop_ABI
+  - skip_chopper:
+      type: boolean
+      description: Skip read filtering with Chopper
+output:
+  - reads:
+      description: |
+        Preprocessed reads, one element per sample; metadata is unchanged
+        Structure: [ val(meta), path(fastq) ]
+  - porechop_log:
+      description: |
+        Porechop_ABI log per sample; empty when adapter trimming is skipped
+        Structure: [ val(meta), path(log) ]
+authors:
+  - "@amakunin"
+maintainers:
+  - "@amakunin"

@@ -1,0 +1,120 @@
+nextflow_workflow {
+
+    name "Test Subworkflow ONT_PREPROCESSING"
+    script "../main.nf"
+    workflow "ONT_PREPROCESSING"
+
+    tag "subworkflows"
+    tag "subworkflows_local"
+    tag "ont_preprocessing"
+
+    // The synthetic fixture has 5 reads at Q40; with default tool arguments
+    // all reads pass both steps, so counts check plumbing, not filtering.
+
+    test("porechop_abi and chopper") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = channel.of([ [ id:'test' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ])
+                input[1] = false
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 2 },
+                { assert workflow.out.reads.size() == 1 },
+                { assert workflow.out.reads[0][0] == [ id:'test' ] },
+                { assert workflow.out.reads[0][1].endsWith('test.chopper.fastq.gz') },
+                { assert path(workflow.out.reads[0][1]).linesGzip.size() == 20 },
+                { assert workflow.out.porechop_log.size() == 1 }
+            )
+        }
+    }
+
+    test("porechop_abi only") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = channel.of([ [ id:'test' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ])
+                input[1] = false
+                input[2] = true
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 1 },
+                { assert workflow.out.reads[0][0] == [ id:'test' ] },
+                { assert workflow.out.reads[0][1].endsWith('test.porechop_abi.fastq.gz') },
+                { assert path(workflow.out.reads[0][1]).linesGzip.size() == 20 }
+            )
+        }
+    }
+
+    test("chopper only") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = channel.of([ [ id:'test' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ])
+                input[1] = true
+                input[2] = false
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 1 },
+                { assert workflow.out.reads[0][0] == [ id:'test' ] },
+                { assert workflow.out.reads[0][1].endsWith('test.chopper.fastq.gz') },
+                { assert path(workflow.out.reads[0][1]).linesGzip.size() == 20 },
+                { assert workflow.out.porechop_log.size() == 0 }
+            )
+        }
+    }
+
+    test("both skipped - passthrough") {
+
+        when {
+            params {
+                outdir = "$outputDir"
+            }
+            workflow {
+                """
+                input[0] = channel.of([ [ id:'test' ], file("\$projectDir/tests/fixtures/cutadapt_demux/reads.fastq.gz", checkIfExists: true) ])
+                input[1] = true
+                input[2] = true
+                """
+            }
+        }
+
+        then {
+            assertAll(
+                { assert workflow.success },
+                { assert workflow.trace.tasks().size() == 0 },
+                { assert workflow.out.reads[0][0] == [ id:'test' ] },
+                { assert workflow.out.reads[0][1].endsWith('reads.fastq.gz') },
+                { assert workflow.out.porechop_log.size() == 0 }
+            )
+        }
+    }
+}

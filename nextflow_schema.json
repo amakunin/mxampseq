@@ -37,7 +37,7 @@
                     "enum": ["ont", "pacbio"],
                     "default": "ont",
                     "description": "Sequencing platform used to generate the reads.",
-                    "help_text": "Currently used to select platform-aware filtering defaults and to keep ONT and PacBio workflows separable as pipeline logic expands.",
+                    "help_text": "Only 'ont' is implemented in this version; other values fail at initialisation. The parameter is kept to keep ONT and PacBio workflows separable as pipeline logic expands.",
                     "fa_icon": "fas fa-microchip"
                 },
                 "outdir": {
@@ -77,6 +77,48 @@
                     "default": false,
                     "description": "Anchor primers to read ends (adds cutadapt 'X' to both ends of each linked adapter).",
                     "fa_icon": "fas fa-anchor"
+                }
+            }
+        },
+        "ont_preprocessing_options": {
+            "title": "ONT preprocessing options",
+            "type": "object",
+            "fa_icon": "fas fa-filter",
+            "description": "Sample-level adapter trimming and read filtering before demultiplexing.",
+            "properties": {
+                "skip_porechop_abi": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip adapter trimming with Porechop_ABI.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "skip_chopper": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Skip read filtering with Chopper.",
+                    "fa_icon": "fas fa-forward"
+                },
+                "porechop_abi_params": {
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^[A-Za-z0-9 .=_-]*$",
+                    "not": {
+                        "pattern": "(^|\\s)(-i|--input|-o|--output|-t|--threads|--format|--custom_adapters)(\\s|=|$)"
+                    },
+                    "description": "Additional Porechop_ABI arguments, e.g. '--abi'.",
+                    "help_text": "Input, output, format, thread and custom-adapter options are set by the pipeline and cannot be given here.",
+                    "fa_icon": "fas fa-sliders-h"
+                },
+                "chopper_params": {
+                    "type": "string",
+                    "default": "",
+                    "pattern": "^[A-Za-z0-9 .=_-]*$",
+                    "not": {
+                        "pattern": "(^|\\s)(-i|--input|-t|--threads|-c|--contam)(\\s|=|$)"
+                    },
+                    "description": "Additional Chopper arguments, e.g. '-q 16 -l 100'.",
+                    "help_text": "Input, thread and contamination-FASTA options are set by the pipeline and cannot be given here.",
+                    "fa_icon": "fas fa-sliders-h"
                 }
             }
         },
@@ -211,6 +253,9 @@
         },
         {
             "$ref": "#/$defs/demultiplexing_options"
+        },
+        {
+            "$ref": "#/$defs/ont_preprocessing_options"
         },
         {
             "$ref": "#/$defs/institutional_config_options"

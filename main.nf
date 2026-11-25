@@ -70,7 +70,8 @@ workflow {
         params.anchor_primers,
         params.help,
         params.help_full,
-        params.show_hidden
+        params.show_hidden,
+        params.platform
     )
 
     //

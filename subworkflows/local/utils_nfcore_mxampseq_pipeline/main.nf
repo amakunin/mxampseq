@@ -38,6 +38,7 @@ workflow PIPELINE_INITIALISATION {
     help              // boolean: Display help message and exit
     help_full         // boolean: Show the full help message
     show_hidden       // boolean: Show hidden parameters in the help message
+    platform          //  string: Sequencing platform; only 'ont' is implemented
 
     main:
 
@@ -101,6 +102,14 @@ workflow PIPELINE_INITIALISATION {
     UTILS_NFCORE_PIPELINE (
         nextflow_cli_args
     )
+
+    //
+    // The platform switch is kept for future expansion, but only ONT
+    // processing is implemented so far
+    //
+    if (platform != 'ont') {
+        error "platform '${platform}' is not implemented yet; only 'ont' is supported"
+    }
 
     //
     // Targets from the analysis setup, validated against assets/schema_analysis.json

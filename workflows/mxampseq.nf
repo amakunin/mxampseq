@@ -7,6 +7,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mxampseq_pipeline'
 include { CUTADAPT_DEMUX         } from '../modules/local/cutadapt/demux'
+include { ONT_PREPROCESSING      } from '../subworkflows/local/ont_preprocessing'
 include { TARGET_CONSENSUS       } from '../subworkflows/local/target_consensus'
 
 /*
@@ -28,9 +29,14 @@ workflow MXAMPSEQ {
     def ch_versions = channel.empty()
 
     //
+    // SUBWORKFLOW: sample-level adapter trimming and read filtering
+    //
+    ONT_PREPROCESSING(ch_samplesheet, params.skip_porechop_abi, params.skip_chopper)
+
+    //
     // MODULE: demultiplex each sample into targets
     //
-    CUTADAPT_DEMUX(ch_samplesheet, ch_adapters)
+    CUTADAPT_DEMUX(ONT_PREPROCESSING.out.reads, ch_adapters)
 
     //
     // One element per sample x target, the file name is <sample>.<target>.fastq.gz;

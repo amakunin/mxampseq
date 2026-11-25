@@ -3,6 +3,20 @@
     "homePage": "https://github.com/nf-core/mxampseq",
     "repos": {
         "https://github.com/nf-core/modules.git": {
+            "modules": {
+                "nf-core": {
+                    "chopper": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    },
+                    "porechop/abi": {
+                        "branch": "master",
+                        "git_sha": "7b3452a23773f687ededb4befd037920e5a51341",
+                        "installed_by": ["modules"]
+                    }
+                }
+            },
             "subworkflows": {
                 "nf-core": {
                     "utils_nextflow_pipeline": {
