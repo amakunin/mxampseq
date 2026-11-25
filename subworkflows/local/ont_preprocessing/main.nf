@@ -18,7 +18,11 @@ def filterEmptyReads(ch_reads, stage) {
             }
         }
 
-    return split.nonempty
+    def ch_nonempty = split.nonempty.ifEmpty {
+        error "All samples have zero reads at ${stage}; cannot continue."
+    }
+
+    return ch_nonempty
 }
 
 //
