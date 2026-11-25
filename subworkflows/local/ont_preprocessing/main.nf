@@ -1,6 +1,26 @@
 include { PORECHOP_ABI } from '../../../modules/nf-core/porechop/abi/main'
 include { CHOPPER      } from '../../../modules/nf-core/chopper/main'
 
+// Filter out empty read files and log warnings for samples with no reads
+
+def filterEmptyReads(ch_reads, stage) {
+    def split = ch_reads.branch { item ->
+        empty: item[1].countFastq() == 0
+        nonempty: true
+    }
+
+    split.empty
+        .map { meta, _reads -> meta.id }
+        .collect()
+        .subscribe { sample_ids ->
+            if (sample_ids) {
+                log.warn "Samples with no reads at ${stage} will be skipped:\n${sample_ids.join('\n')}"
+            }
+        }
+
+    return split.nonempty
+}
+
 //
 // Sample-level ONT preprocessing before target demultiplexing:
 // adapter trimming (Porechop_ABI) followed by read filtering (Chopper),
@@ -17,11 +37,14 @@ workflow ONT_PREPROCESSING {
 
     main:
 
+    // Filter empty files
+    ch_reads = filterEmptyReads(ch_reads, "initial preprocessing")
+
     def ch_trimmed = ch_reads
     def ch_porechop_log = channel.empty()
     if (!skip_porechop_abi) {
         PORECHOP_ABI(ch_reads, [])
-        ch_trimmed = PORECHOP_ABI.out.reads
+        ch_trimmed = filterEmptyReads(PORECHOP_ABI.out.reads, "after Porechop_ABI")
         ch_porechop_log = PORECHOP_ABI.out.log
     }
 
