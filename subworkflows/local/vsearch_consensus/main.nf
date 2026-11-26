@@ -9,7 +9,7 @@ include { VSEARCH_UCHIME3_DENOVO } from '../../../modules/local/vsearch/uchime3d
 // Clustering and optional fastq filtering parameters are taken from meta via conf/modules.config
 //
 
-workflow TARGET_CONSENSUS {
+workflow VSEARCH_CONSENSUS {
 
     take:
     ch_target_reads // channel: [ meta, fastq ], one element per sample x target

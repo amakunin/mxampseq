@@ -32,7 +32,7 @@ workflow PIPELINE_INITIALISATION {
     nextflow_cli_args //   array: List of positional nextflow CLI args
     outdir            //  string: The output directory where the results will be saved
     input             //  string: Path to input samplesheet
-    analysis_setup    //  string: Path to analysis setup yaml (list of targets)
+    targets_setup    //  string: Path to targets setup yaml (list of targets)
     demux_params      //  string: Extra cutadapt arguments
     anchor_primers    // boolean: Anchor primers to read ends
     help              // boolean: Display help message and exit
@@ -112,46 +112,42 @@ workflow PIPELINE_INITIALISATION {
     }
 
     //
-    // Targets from the analysis setup, validated against assets/schema_analysis.json
-    // each row is [ meta(target, clustering, clustering_params), forward_primer, reverse_primer ]
+    // Reading targets setup YAML and converting to list
     //
-    def target_list = samplesheetToList(analysis_setup, "${projectDir}/assets/schema_analysis.json")
-        .collect { meta, forward_primer, reverse_primer ->
-            meta + [
-                forward_primer: forward_primer.toUpperCase(),
-                reverse_primer: reverse_primer.toUpperCase(),
-                clustering_params: meta.clustering_params ?: '',
-                fastqfilter_params: meta.fastqfilter_params ?: ''
-            ]
-        }
-
-    // Targets sharing a primer pair cannot be told apart by demultiplexing (not expressible in the schema)
-    def primer_pairs = target_list.collect { t -> "${t.forward_primer}...${t.reverse_primer}" }
-    def shared_pairs = primer_pairs.findAll { pair -> primer_pairs.count(pair) > 1 }.unique()
-    if (shared_pairs) {
-        error("Analysis setup ${analysis_setup}: several targets share the primer pair ${shared_pairs.join(', ')}")
+    def target_list = samplesheetToList(targets_setup, "${projectDir}/assets/schema_targets.json")
+    .collect { row ->
+        def meta = row[0] // 0 - meta, 1 - non-meta properties
+        // fill in default values for optional fields with same values as in schema_targets.json
+        meta + [
+            clustering: meta.clustering ?: 'cluster_fast',
+            clustering_params: meta.clustering_params ?: '',
+            fastqfilter_params: meta.fastqfilter_params ?: '',
+            savont_mode: meta.savont_mode ?: 'independent',
+            savont_params: meta.savont_params ?: ''
+        ]
     }
-
-    //
-    // Linked-adapter fasta shared by all samples
-    //
-    ch_adapters = channel.of(primersToAdaptersFasta(target_list, anchor_primers))
-        .collectFile(name: 'adapters.fasta', newLine: false)
-        .first()
 
     //
     // Per-target clustering settings, keyed by target name
     //
     ch_targets = channel.value(
         target_list.collectEntries { t ->
-            [ (t.target): [
-                fastqfilter_params: t.fastqfilter_params,
-                clustering: t.clustering,
-                clustering_params: t.clustering_params
-                ] ]
+            [(t.target): (t - 'target')]
         }
     )
 
+
+    //
+    // Linked-adapter fasta shared by all samples
+    //
+    def adapters_fasta = target_list.collect { target ->
+        ">${target.target}\n${target.cutadapt_linked_adapters}\n"
+    }.join('')
+
+    ch_adapters = channel.of(adapters_fasta)
+        .collectFile(name: 'adapters.fasta', newLine: false)
+        .first()
+    
     //
     // Create channel from input file provided through params.input
     //

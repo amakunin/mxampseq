@@ -1,8 +1,8 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/mxampseq/master/assets/schema_analysis.json",
-    "title": "nf-core/mxampseq pipeline - params.analysis_setup schema",
-    "description": "Schema for the file provided with params.analysis_setup: a list of targets and their analysis settings",
+    "$id": "https://raw.githubusercontent.com/nf-core/mxampseq/master/assets/schema_targets.json",
+    "title": "nf-core/mxampseq pipeline - params.targets_setup schema",
+    "description": "Schema for the file provided with params.targets_setup: a list of targets and their analysis settings",
     "type": "array",
     "minItems": 1,
     "items": {
@@ -15,15 +15,17 @@
                 "errorMessage": "Target name is required, may only contain letters, digits and '-', and 'unknown' is reserved for reads matching no target",
                 "meta": ["target"]
             },
-            "forward_primer": {
+            "cutadapt_linked_adapters": {
                 "type": "string",
-                "pattern": "^[ACGTRYSWKMBDHVNacgtryswkmbdhvn]+$",
-                "errorMessage": "Forward primer is required and must be an IUPAC sequence without X anchors"
+                "pattern": "^[X^]?[ACGTRYSWKMBDHVN]+(;min_overlap=[1-9][0-9]*)?\\.{3}[ACGTRYSWKMBDHVN]+(;min_overlap=[1-9][0-9]*)?[X$]?$",
+                "errorMessage": "Linked primers are required by cutadapt demux and must be like ACTG...GCRA with optional minimum overlap (e.g., ;min_overlap=3), non-internal (X) or anchored (^ and $) requirement at ends",
+                "meta": ["cutadapt_linked_adapters"]
             },
-            "reverse_primer": {
+            "consensus": {
                 "type": "string",
-                "pattern": "^[ACGTRYSWKMBDHVNacgtryswkmbdhvn]+$",
-                "errorMessage": "Reverse primer is required and must be an IUPAC sequence without X anchors"
+                "enum": ["savont", "vsearch"],
+                "errorMessage": "Consensus is required and must be one of savont, vsearch",
+                "meta": ["consensus"]
             },
             "fastqfilter_params": {
                 "type": "string",
@@ -35,6 +37,7 @@
             },
             "clustering": {
                 "type": "string",
+                "default": "cluster_fast",
                 "enum": ["cluster_fast", "cluster_size", "cluster_smallmem", "cluster_unoise"],
                 "errorMessage": "Clustering must be one of cluster_fast, cluster_size, cluster_smallmem, cluster_unoise",
                 "meta": ["clustering"]
@@ -48,10 +51,28 @@
                 },
                 "errorMessage": "clustering_params may only contain letters, digits, spaces and . = _ - and must not set --sizein, --sizeout, --consout, --threads, output flags or a cluster_* algorithm",
                 "meta": ["clustering_params"]
+            },
+            "savont_mode": {
+                "type": "string",
+                "default": "independent",
+                "enum": ["pooled", "independent"],
+                "errorMessage": "Savont mode is required and must be one of pooled, independent",
+                "meta": ["savont_mode"]
+            },
+            "savont_params": {
+                "type": "string",
+                "default": "",
+                "pattern": "^[A-Za-z0-9 .=_-]*$",
+                "not": { "pattern": "(^|\\s)--(threads)(\\s|=|$)" },
+                "errorMessage": "savont_params may only contain letters, digits, spaces and . = _ - and must not set --threads",
+                "meta": ["savont_params"]
             }
         },
-        "required": ["target", "forward_primer", "reverse_primer", "clustering"],
+        "required": ["target", "cutadapt_linked_adapters", "consensus"],
         "additionalProperties": false
     },
-    "uniqueEntries": ["target"]
+    "allOf": [
+        { "uniqueEntries": ["target"] },
+        { "uniqueEntries": ["cutadapt_linked_adapters"] }
+    ]
 }

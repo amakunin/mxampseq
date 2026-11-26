@@ -8,7 +8,7 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mxampseq_pipeline'
 include { ONT_PREPROCESSING      } from '../subworkflows/local/ont_preprocessing'
 include { CUTADAPT_DEMUX         } from '../modules/local/cutadapt/demux'
-include { TARGET_CONSENSUS       } from '../subworkflows/local/target_consensus'
+include { VSEARCH_CONSENSUS       } from '../subworkflows/local/vsearch_consensus'
 include { SAVONT_CONSENSUS } from '../subworkflows/local/savont_consensus'
 
 /*
@@ -71,9 +71,16 @@ workflow MXAMPSEQ {
     // ch_target_reads.view { meta, fq -> "target meta: ${meta}" }
 
     //
-    // SUBWORKFLOW: dereplicate and cluster each sample x target into consensus sequences
+    // cluster each sample x target into consensus sequences according to the specified consensus method
     //
-    TARGET_CONSENSUS(ch_target_reads)
+    def ch_consensus = ch_target_reads.branch {
+        meta, _fq ->
+            vsearch: meta.consensus == 'vsearch'
+            savont:  meta.consensus == 'savont'
+    }
+
+    VSEARCH_CONSENSUS(ch_consensus.vsearch)
+    SAVONT_CONSENSUS(ch_consensus.savont)
 
     //
     // Collate and save software versions

@@ -1,10 +1,10 @@
 - target: COI
-  forward_primer: acgtcagtacgatcgtacga
-  reverse_primer: tcgactagctagtcaggtac
+  cutadapt_linked_adapters: XRKTCAACMAATCATAAAGATATTGG;min_overlap=10...TGATTTTTTGGWCAYCCWGAAGTTTAX;min_overlap=10
+  consensus: vsearch
   clustering: cluster_fast
   clustering_params: '--id 0.97'
 - target: ITS2
-  forward_primer: ttgaccgatgctagacctga
-  reverse_primer: gtcgaactgtaccgaatctg
+  forward_primer: XTGTGAACTGCAGGACACAT;min_overlap=10...ACCCCCTGAATTTAAGCATAX;min_overlap=10
+  consensus: vsearch
   fastqfilter_params: '--fastq_minlen 20'
   clustering: cluster_size

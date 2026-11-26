@@ -15,7 +15,7 @@ process SAVONT_ASV {
     path("*_feature-table.tsv") , emit: asv
     path("*_final_asvs.fasta")  , emit: fasta
     path("*_final_assignments.tsv"), emit: clusters
-    path("*_stats.tsv")         , emit: stats
+    tuple val(meta), path("*_stats.tsv"), emit: stats
     path("savont_asv_*/temp/*") , emit: temp
     tuple val(meta), path("savont_asv_*"), val(sample_string), emit: output_folder
     path("*_savont.log")        , emit: log

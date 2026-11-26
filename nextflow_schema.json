@@ -10,7 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": ["input", "analysis_setup"],
+            "required": ["input", "targets_setup"],
             "properties": {
                 "input": {
                     "type": "string",
@@ -19,18 +19,18 @@
                     "schema": "assets/schema_input.json",
                     "pattern": "^\\S+\\.(tsv|csv)$",
                     "description": "Path to a TSV or CSV samplesheet linking sample IDs to read files.",
-                    "help_text": "Tab-separated (.tsv) or comma-separated (.csv) file with a header row and two columns: `sample_id` and `reads` (path to a single-end `.fastq.gz`). Supply target definitions separately with `--analysis_setup`.",
+                    "help_text": "Tab-separated (.tsv) or comma-separated (.csv) file with a header row and two columns: `sample_id` and `reads` (path to a single-end `.fastq.gz`). Supply target definitions separately with `--targets_setup`.",
                     "fa_icon": "fas fa-file-csv"
                 },
-                "analysis_setup": {
+                "targets_setup": {
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_analysis.json",
+                    "schema": "assets/schema_targets.json",
                     "mimetype": "application/x-yaml",
                     "pattern": "^\\S+\\.ya?ml$",
-                    "description": "Path to YAML file with the list of targets, their primers and clustering settings.",
-                    "help_text": "A YAML list; each item has `target`, `forward_primer`, `reverse_primer`, `clustering` and optionally `fastqfilter_params` and `clustering_params`."
+                    "description": "Path to YAML file with the list of targets, their primers and consensus settings.",
+                    "help_text": "A YAML list; each item has `target`, `cutadapt_linked_adapters`, `consensus` and optional consensus generation settings."
                 },
                 "platform": {
                     "type": "string",
@@ -59,7 +59,7 @@
             "title": "Demultiplexing options",
             "type": "object",
             "fa_icon": "fas fa-cut",
-            "description": "Options for separating reads into targets with cutadapt.",
+            "description": "Options for demultiplexing reads into targets with cutadapt.",
             "properties": {
                 "demux_params": {
                     "type": "string",
@@ -71,12 +71,6 @@
                     "description": "Additional cutadapt arguments, e.g. '-e 0.15 -O 10' or '--revcomp -e 0.15 -O 10'.",
                     "help_text": "Output, adapter, core and report options are set by the pipeline and cannot be given here. Reads are not searched on the reverse strand unless `--revcomp` is given.",
                     "fa_icon": "fas fa-sliders-h"
-                },
-                "anchor_primers": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Anchor primers to read ends (adds cutadapt 'X' to both ends of each linked adapter).",
-                    "fa_icon": "fas fa-anchor"
                 }
             }
         },
