@@ -6,9 +6,10 @@
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mxampseq_pipeline'
-include { CUTADAPT_DEMUX         } from '../modules/local/cutadapt/demux'
 include { ONT_PREPROCESSING      } from '../subworkflows/local/ont_preprocessing'
+include { CUTADAPT_DEMUX         } from '../modules/local/cutadapt/demux'
 include { TARGET_CONSENSUS       } from '../subworkflows/local/target_consensus'
+include { SAVONT_CONSENSUS } from '../subworkflows/local/savont_consensus'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
